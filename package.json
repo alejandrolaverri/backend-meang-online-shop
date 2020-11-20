@@ -32,6 +32,8 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
+    "@graphql-tools/load-files": "^6.0.18",
+    "@graphql-tools/merge": "^6.0.18",
     "apollo-server-express": "^2.19.0",
     "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
@@ -41,6 +43,7 @@
     "express": "^4.17.1",
     "graphql": "^15.4.0",
     "graphql-import-node": "0.0.4",
+    "graphql-merge-resolvers": "^1.1.16",
     "graphql-playground-middleware-express": "^1.7.22",
     "graphql-tools": "^7.0.1",
     "jsonwebtoken": "^8.5.1",

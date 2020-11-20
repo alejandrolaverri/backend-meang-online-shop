@@ -1,13 +1,13 @@
-import { COLLECTIONS } from './../config/constants';
+import { asignDocumentId, findOneElement, insertOneElement } from './../../lib/db-operations';
+import { COLLECTIONS } from './../../config/constants';
 import { IResolvers } from 'graphql-tools';
 import bcrypt from 'bcrypt';
 
-const resolversMutation: IResolvers = {
+const resolversUserMutation: IResolvers = {
     Mutation: {
         async register(_, { user }, { db }) {
             // Comprobar que el usuario no existe
-            const userCheck = await db.collection(COLLECTIONS.USERS)
-                                      .findOne({ email: user.email });;
+            const userCheck = await findOneElement(db, COLLECTIONS.USERS, { email: user.email });
             
             if (userCheck !== null) {
                 return {
@@ -18,15 +18,7 @@ const resolversMutation: IResolvers = {
             }
             
             // Comprobar el último usuario registrado para asignar ID
-            const lastUser = await db.collection(COLLECTIONS.USERS)
-                                     .find()
-                                     .limit(1)
-                                     .sort({ registerDate: -1 }).toArray();
-            if (lastUser.length === 0) {
-                user.id = 1;
-            } else {
-                user.id = lastUser[0].id + 1;
-            }
+            user.id = await asignDocumentId(db, COLLECTIONS.USERS, { registerDate: -1 });
 
             // Asignar la fecha en formato ISO en la propiedad registerDate
             user.registerDate = new Date().toISOString();
@@ -35,8 +27,7 @@ const resolversMutation: IResolvers = {
             user.password = bcrypt.hashSync(user.password, 10);
             
             // Guardar el documento (registro) en la colleción
-            return await db.collection(COLLECTIONS.USERS)
-                           .insertOne(user)
+            return await insertOneElement(db, COLLECTIONS.USERS, user)
                            .then(
                                async () => {
                                     return {
@@ -48,13 +39,13 @@ const resolversMutation: IResolvers = {
                            ).catch((err: Error) => {
                                console.log(err.message);
                                return {
-                                status: false,
-                                message: `Error inesperado, prueba de nuevo.`,
-                                user: null
-                            };
+                                    status: false,
+                                    message: `Error inesperado, prueba de nuevo.`,
+                                    user: null
+                                };
                            });
         }
     }
 };
 
-export default resolversMutation;
+export default resolversUserMutation;
